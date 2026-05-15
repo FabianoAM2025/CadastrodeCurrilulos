@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cadastro de currículo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <p class="eyebrow">RH · candidatos</p>
+      <h1>Cadastro de currículo</h1>
+      <p class="lede">
+        Preencha os campos abaixo. Você pode exportar os dados em JSON para integrar com seu sistema ou enviar por e-mail.
+      </p>
+    </header>
+
+    <main>
+      <form id="cv-form" novalidate>
+        <section class="card" aria-labelledby="sec-dados">
+          <h2 id="sec-dados">Dados pessoais</h2>
+          <div class="grid grid-2">
+            <label class="field">
+              <span>Nome completo <abbr title="obrigatório">*</abbr></span>
+              <input type="text" name="nome" required autocomplete="name" />
+            </label>
+            <label class="field">
+              <span>Data de nascimento</span>
+              <input type="date" name="dataNascimento" />
+            </label>
+            <label class="field">
+              <span>E-mail <abbr title="obrigatório">*</abbr></span>
+              <input type="email" name="email" required autocomplete="email" />
+            </label>
+            <label class="field">
+              <span>Telefone / WhatsApp <abbr title="obrigatório">*</abbr></span>
+              <input type="tel" name="telefone" required autocomplete="tel" />
+            </label>
+            <label class="field">
+              <span>Cidade / UF</span>
+              <input type="text" name="localidade" autocomplete="address-level2" placeholder="Ex.: São Paulo / SP" />
+            </label>
+            <label class="field">
+              <span>LinkedIn ou portfólio</span>
+              <input type="url" name="linkedin" inputmode="url" placeholder="https://" />
+            </label>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="sec-objetivo">
+          <h2 id="sec-objetivo">Objetivo</h2>
+          <label class="field">
+            <span>Resumo profissional ou cargo desejado</span>
+            <textarea name="objetivo" rows="4" placeholder="Breve texto sobre sua trajetória e o que busca."></textarea>
+          </label>
+        </section>
+
+        <section class="card" aria-labelledby="sec-formacao">
+          <h2 id="sec-formacao">Formação</h2>
+          <div id="formacao-list" class="stack"></div>
+          <button type="button" class="btn btn-ghost" id="add-formacao">+ Adicionar formação</button>
+        </section>
+
+        <section class="card" aria-labelledby="sec-exp">
+          <h2 id="sec-exp">Experiência profissional</h2>
+          <div id="experiencia-list" class="stack"></div>
+          <button type="button" class="btn btn-ghost" id="add-experiencia">+ Adicionar experiência</button>
+        </section>
+
+        <section class="card" aria-labelledby="sec-skills">
+          <h2 id="sec-skills">Habilidades</h2>
+          <label class="field">
+            <span>Liste habilidades separadas por vírgula</span>
+            <input type="text" name="habilidades" placeholder="Ex.: Excel, atendimento ao cliente, inglês avançado" />
+          </label>
+        </section>
+
+        <section class="card" aria-labelledby="sec-arquivo">
+          <h2 id="sec-arquivo">Anexo (opcional)</h2>
+          <label class="field upload">
+            <span>Currículo em PDF (máx. 5 MB)</span>
+            <input type="file" name="arquivo" accept=".pdf,application/pdf" />
+            <p class="hint" id="file-hint">Nenhum arquivo selecionado.</p>
+          </label>
+        </section>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Salvar e exportar JSON</button>
+          <button type="button" class="btn btn-secondary" id="btn-reset">Limpar formulário</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </form>
+    </main>
+
+    <footer class="footer">
+      <p>Dica: para armazenar no servidor ou banco de dados, conecte este formulário a uma API (Node, PHP, etc.).</p>
+    </footer>
+  </div>
+
+  <template id="tpl-formacao">
+    <div class="subcard" data-block="formacao">
+      <button type="button" class="btn-remove" title="Remover">×</button>
+      <div class="grid grid-2">
+        <label class="field">
+          <span>Curso</span>
+          <input type="text" class="f-curso" />
+        </label>
+        <label class="field">
+          <span>Instituição</span>
+          <input type="text" class="f-instituicao" />
+        </label>
+        <label class="field">
+          <span>Conclusão (ano)</span>
+          <input type="number" class="f-ano" min="1950" max="2035" step="1" />
+        </label>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-experiencia">
+    <div class="subcard" data-block="experiencia">
+      <button type="button" class="btn-remove" title="Remover">×</button>
+      <div class="grid grid-2">
+        <label class="field">
+          <span>Empresa</span>
+          <input type="text" class="e-empresa" />
+        </label>
+        <label class="field">
+          <span>Cargo</span>
+          <input type="text" class="e-cargo" />
+        </label>
+        <label class="field">
+          <span>Início</span>
+          <input type="month" class="e-inicio" />
+        </label>
+        <label class="field">
+          <span>Fim (deixe vazio se atual)</span>
+          <input type="month" class="e-fim" />
+        </label>
+      </div>
+      <label class="field">
+        <span>Atividades</span>
+        <textarea class="e-desc" rows="3"></textarea>
+      </label>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
