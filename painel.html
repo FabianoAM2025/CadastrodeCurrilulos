@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel de candidatos — RH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page page-wide">
+    <header class="hero">
+      <p class="eyebrow">RH · leitura</p>
+      <h1>Candidatos cadastrados</h1>
+      <p class="lede">
+        Lista de quem enviou currículo por esta aplicação. Em produção, proteja esta página com <strong>login</strong> e HTTPS — hoje é só para uso local na mesma rede do servidor.
+      </p>
+      <nav class="nav-inline" aria-label="Atalhos">
+        <a class="btn btn-secondary" href="/">Novo cadastro (formulário)</a>
+        <button type="button" class="btn btn-primary" id="btn-refresh">Atualizar lista</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="card" aria-labelledby="sec-lista">
+        <h2 id="sec-lista">Resumo</h2>
+        <p class="hint-table" id="list-status">A carregar…</p>
+        <div class="table-wrap">
+          <table class="data-table" id="tbl">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Data</th>
+                <th scope="col">Nome</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card detail-card" id="detail-section" hidden>
+        <div class="detail-head">
+          <h2 id="detail-title">Detalhe do candidato</h2>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-close-detail">Fechar</button>
+        </div>
+        <div id="detail-content"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>URL desta página: <code>/painel.html</code> (com o servidor em <code>http://localhost:3000</code>).</p>
+    </footer>
+  </div>
+
+  <script src="painel.js"></script>
+</body>
+</html>

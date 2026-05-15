@@ -1,0 +1,17 @@
+{
+  "name": "cadastro-curriculos",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Formulário de currículo com SQLite local (node:sqlite)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

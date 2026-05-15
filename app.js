@@ -8,6 +8,7 @@ const formacaoList = document.getElementById("formacao-list");
 const experienciaList = document.getElementById("experiencia-list");
 const tplFormacao = document.getElementById("tpl-formacao");
 const tplExperiencia = document.getElementById("tpl-experiencia");
+const alsoJsonEl = document.getElementById("also-json");
 
 function setStatus(msg, isError = false) {
   statusEl.textContent = msg;
@@ -71,6 +72,51 @@ function readFileAsBase64(file) {
   });
 }
 
+function downloadJson(payload) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  const safeName = payload.dadosPessoais.nome.replace(/\s+/g, "_").slice(0, 40);
+  a.href = URL.createObjectURL(blob);
+  a.download = `curriculo_${safeName}_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function buildPayload() {
+  const file = fileInput.files[0];
+  const payload = {
+    cadastradoEm: new Date().toISOString(),
+    dadosPessoais: {
+      nome: form.nome.value.trim(),
+      dataNascimento: form.dataNascimento.value,
+      email: form.email.value.trim(),
+      telefone: form.telefone.value.trim(),
+      localidade: form.localidade.value.trim(),
+      linkedin: form.linkedin.value.trim(),
+    },
+    objetivo: form.objetivo.value.trim(),
+    formacao: collectFormacao().filter((x) => x.curso || x.instituicao || x.anoConclusao),
+    experiencia: collectExperiencia().filter((x) => x.empresa || x.cargo || x.descricao),
+    habilidades: form.habilidades.value
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+    anexo: null,
+  };
+
+  if (file) {
+    const base64 = await readFileAsBase64(file);
+    payload.anexo = {
+      nome: file.name,
+      tipo: file.type,
+      tamanhoBytes: file.size,
+      conteudoBase64: base64,
+    };
+  }
+
+  return payload;
+}
+
 fileInput.addEventListener("change", () => {
   const f = fileInput.files[0];
   if (!f) {
@@ -114,50 +160,52 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  const payload = {
-    cadastradoEm: new Date().toISOString(),
-    dadosPessoais: {
-      nome: form.nome.value.trim(),
-      dataNascimento: form.dataNascimento.value,
-      email: form.email.value.trim(),
-      telefone: form.telefone.value.trim(),
-      localidade: form.localidade.value.trim(),
-      linkedin: form.linkedin.value.trim(),
-    },
-    objetivo: form.objetivo.value.trim(),
-    formacao: collectFormacao().filter((x) => x.curso || x.instituicao || x.anoConclusao),
-    experiencia: collectExperiencia().filter((x) => x.empresa || x.cargo || x.descricao),
-    habilidades: form.habilidades.value
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean),
-    anexo: null,
-  };
-
-  if (file) {
-    try {
-      const base64 = await readFileAsBase64(file);
-      payload.anexo = {
-        nome: file.name,
-        tipo: file.type,
-        tamanhoBytes: file.size,
-        conteudoBase64: base64,
-      };
-    } catch {
-      setStatus("Não foi possível ler o PDF. Tente outro arquivo.", true);
-      return;
-    }
+  let payload;
+  try {
+    payload = await buildPayload();
+  } catch {
+    setStatus("Não foi possível ler o PDF. Tente outro arquivo.", true);
+    return;
   }
 
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  const safeName = payload.dadosPessoais.nome.replace(/\s+/g, "_").slice(0, 40);
-  a.href = URL.createObjectURL(blob);
-  a.download = `curriculo_${safeName}_${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  const wantJson = alsoJsonEl.checked;
+  const isFileProtocol = window.location.protocol === "file:";
 
-  setStatus("Arquivo JSON gerado. Guarde-o com segurança — pode conter dados pessoais e o PDF em Base64.");
+  if (isFileProtocol) {
+    if (wantJson) downloadJson(payload);
+    setStatus(
+      wantJson
+        ? "Página aberta como ficheiro local: só foi possível o JSON. Para gravar na base, abra http://localhost:3000 após npm start."
+        : "Abra a página em http://localhost:3000 (corra npm start na pasta do projeto) para gravar no SQLite.",
+      !wantJson
+    );
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/curriculos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const body = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      const extra = wantJson ? " Cópia JSON descarregada." : "";
+      setStatus(`Cadastro nº ${body.id} gravado na base local.${extra}`);
+      if (wantJson) downloadJson(payload);
+      return;
+    }
+
+    setStatus(body.erro || `Erro ao gravar (${res.status}).`, true);
+    if (wantJson) downloadJson(payload);
+  } catch {
+    setStatus(
+      "Não foi possível ligar ao servidor. Na pasta do projeto execute: npm install && npm start",
+      true
+    );
+    if (wantJson) downloadJson(payload);
+  }
 });
 
 addFormacao();

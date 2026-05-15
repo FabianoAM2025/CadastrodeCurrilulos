@@ -15,7 +15,7 @@
       <p class="eyebrow">RH · candidatos</p>
       <h1>Cadastro de currículo</h1>
       <p class="lede">
-        Preencha os campos abaixo. Você pode exportar os dados em JSON para integrar com seu sistema ou enviar por e-mail.
+        Preencha os campos abaixo e salve no <strong>banco SQLite local</strong> (servidor Node na pasta do projeto). Opcionalmente pode baixar uma cópia em JSON.
       </p>
     </header>
 
@@ -88,8 +88,13 @@
           </label>
         </section>
 
+        <label class="field field-check">
+          <input type="checkbox" id="also-json" />
+          <span>Também baixar cópia em JSON neste computador</span>
+        </label>
+
         <div class="actions">
-          <button type="submit" class="btn btn-primary">Salvar e exportar JSON</button>
+          <button type="submit" class="btn btn-primary">Salvar currículo</button>
           <button type="button" class="btn btn-secondary" id="btn-reset">Limpar formulário</button>
         </div>
         <p class="status" id="status" role="status" aria-live="polite"></p>
@@ -97,7 +102,13 @@
     </main>
 
     <footer class="footer">
-      <p>Dica: para armazenar no servidor ou banco de dados, conecte este formulário a uma API (Node, PHP, etc.).</p>
+      <p>
+        Com o servidor ativo (<code>npm start</code>), os dados vão para
+        <code>data/curriculos.db</code>.
+        <strong>Empresa / RH:</strong> veja candidatos em
+        <a href="/painel.html">Painel de candidatos</a>.
+        API JSON: <a href="/api/curriculos">/api/curriculos</a>.
+      </p>
     </footer>
   </div>
 
